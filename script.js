@@ -33,7 +33,7 @@ const debounce = (fn, debounceTime) => {
     };
 };
 
-const getDataDebounce = debounce(getData, 300);
+const getDataDebounce = debounce(getData, 500);
 
 //=======================================================================================================
 // Блок функций отвечающих за создание AUTOCOMPLITE;
@@ -46,6 +46,8 @@ const renderAutoComplite = (data) => {
             autoComplitBlock.append(createAutoString(repoData));
         });
     });
+
+    getVisibleStyle(true);
 };
 
 const createAutoString = (dataStr) => {
@@ -71,6 +73,16 @@ const cleanAutoComplite = () => {
     }
 };
 
+const getVisibleStyle = (isTrue) => {
+    if (isTrue) {
+        autoComplitBlock.classList.add('search__autocomplit-block_visible');
+        searchString.classList.add('search__string_border-bottom_hide');
+    } else {
+        autoComplitBlock.classList.remove('search__autocomplit-block_visible');
+        searchString.classList.remove('search__string_border-bottom_hide');
+    }
+};
+
 //=======================================================================================================
 // Блок функций отвечающих за работу REPO-LIST;
 
@@ -78,10 +90,10 @@ const addItemToRepoList = (item) => {
     const { owner, star, lang, id } = item.dataset;
 
     if (checkId(id)) {
-        const createP = (data) => {
+        const createP = (data, text) => {
             const par = document.createElement('p');
             par.classList.add('repo-list__text');
-            par.innerText = data;
+            par.innerText = `${text}: ${data}`;
 
             return par;
         };
@@ -97,13 +109,15 @@ const addItemToRepoList = (item) => {
         block.classList.add('repo-list__item');
         block.setAttribute('data-id', id);
 
-        block.append(createP(item.innerText));
-        block.append(createP(owner));
-        block.append(createP(star));
-        block.append(createP(lang));
+        block.append(createP(item.innerText, 'Name'));
+        block.append(createP(owner, 'Owner'));
+        block.append(createP(star, 'Stars'));
+        block.append(createP(lang, 'Language'));
         block.append(removeBtn);
 
         repoList.append(block);
+        searchString.value = '';
+        cleanAutoComplite();
     }
 };
 
@@ -120,18 +134,23 @@ const checkId = (id) => {
     return result;
 };
 
+//=====================================================================================================
+// Events;
+
 searchString.addEventListener('input', () => {
     if (searchString.value) {
         getDataDebounce(searchString.value);
     } else {
         setTimeout(() => {
             cleanAutoComplite();
-        }, 350);
+            getVisibleStyle();
+        }, 550);
     }
 });
 
 autoComplitBlock.addEventListener('click', (e) => {
     if (e.target !== autoComplitBlock) {
         addItemToRepoList(e.target);
+        getVisibleStyle();
     }
 });
