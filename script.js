@@ -11,7 +11,7 @@ const getData = (search) => {
     )
         .then((resolve) => {
             if (resolve.ok) {
-                renderAutoComplite(resolve.json());
+                renderAutoComplete(resolve.json());
             } else
                 throw new Error(
                     `Ошибка при получении данных! \n Код ошибки: ${resolve.status} \n URL запроса: ${resolve.url}`,
@@ -36,10 +36,10 @@ const debounce = (fn, debounceTime) => {
 const getDataDebounce = debounce(getData, 500);
 
 //=======================================================================================================
-// Блок функций отвечающих за создание AUTOCOMPLITE;
+// Блок функций отвечающих за создание autocomplete;
 
-const renderAutoComplite = (data) => {
-    cleanAutoComplite();
+const renderAutoComplete = (data) => {
+    cleanAutoComplete();
 
     data.then(({ items }) => {
         items.forEach((repoData) => {
@@ -51,13 +51,13 @@ const renderAutoComplite = (data) => {
 };
 
 const createAutoString = (dataStr) => {
-    const { name, owner, stargazers_count, language, id } = dataStr;
+    const { name, owner, stargazers_count: star, language, id } = dataStr;
     const paragraph = document.createElement('p');
 
     paragraph.classList.add('search__auto-string');
     paragraph.setAttribute('data-id', id);
     paragraph.setAttribute('data-owner', owner.login);
-    paragraph.setAttribute('data-star', stargazers_count);
+    paragraph.setAttribute('data-star', star);
     paragraph.setAttribute('data-lang', language);
 
     paragraph.innerText = name;
@@ -65,7 +65,7 @@ const createAutoString = (dataStr) => {
     return paragraph;
 };
 
-const cleanAutoComplite = () => {
+const cleanAutoComplete = () => {
     const autoStringArr = Array.from(autoComplitBlock.children);
 
     if (autoStringArr.length > 0) {
@@ -117,7 +117,7 @@ const addItemToRepoList = (item) => {
 
         repoList.append(block);
         searchString.value = '';
-        cleanAutoComplite();
+        cleanAutoComplete();
     }
 };
 
@@ -138,11 +138,11 @@ const checkId = (id) => {
 // Events;
 
 searchString.addEventListener('input', () => {
-    if (searchString.value) {
+    if (searchString.value && searchString.value[0] !== ' ') {
         getDataDebounce(searchString.value);
     } else {
         setTimeout(() => {
-            cleanAutoComplite();
+            cleanAutoComplete();
             getVisibleStyle();
         }, 550);
     }
